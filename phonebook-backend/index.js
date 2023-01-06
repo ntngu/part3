@@ -1,7 +1,11 @@
 const express = require("express");
 const app = express();
 const morgan = require("morgan");
+require("dotenv").config();
+const cors = require("cors");
+app.use(cors());
 app.use(express.json());
+app.use(express.static("build"));
 morgan.token("body", function (req, res) {
   return JSON.stringify(req.body);
 });
@@ -76,7 +80,7 @@ app.post("/api/persons", (req, res) => {
       .end();
   } else {
     const person = {
-      id: Math.floor(Math.random() * 500),
+      id: body.id,
       name: body.name,
       number: body.number,
     };
@@ -101,6 +105,18 @@ app.delete("/api/persons/:id", (req, res) => {
   }
 });
 
+app.put("/api/persons/:id", (req, res) => {
+  const id = Number(req.params.id);
+  const person = people.find((person) => person.id === id);
+  if (person) {
+    const updated = { ...person, number: req.body.number };
+    people = people.map((p) => (p.id !== id ? p : updated));
+    res.json(updated);
+  } else {
+    res.status(404).end();
+  }
+});
+
 app.get("/api/info", (req, res) => {
   res.send(
     `<p>Phonebook has info for ${people.length} people</p>
@@ -108,8 +124,7 @@ app.get("/api/info", (req, res) => {
   );
 });
 
-const PORT = 3001;
-
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
 });
