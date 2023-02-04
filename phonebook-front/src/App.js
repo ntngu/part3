@@ -65,21 +65,30 @@ const App = () => {
       }
     } else {
       const personObject = {
-        id: persons.length + 1,
         name: newName,
         number: newNumber,
       };
-      personService.create(personObject).then(
-        setPersons(persons.concat(personObject)),
-        setNewName(""),
-        setNewNumber(""),
-        setSuccess("success"),
-        setMessage(`${personObject.name} added...`),
-        setTimeout(() => {
-          setMessage(null);
-          setSuccess("");
-        }, 5000)
-      );
+      personService
+        .create({ name: newName, number: newNumber })
+        .then((person) => {
+          setPersons(persons.concat(person));
+          setNewName("");
+          setNewNumber("");
+          setSuccess("success");
+          setMessage(`${person.name} added...`);
+          setTimeout(() => {
+            setMessage(null);
+            setSuccess("");
+          }, 5000);
+        })
+        .catch((error) => {
+          setSuccess("error");
+          setMessage(`${error.response.data.error}`);
+          setTimeout(() => {
+            setMessage(null);
+            setSuccess("");
+          }, 5000);
+        });
     }
   };
 
@@ -122,7 +131,7 @@ const App = () => {
   return (
     <div>
       <h2>Phonebook</h2>
-      <Notification message={message} success={success}/>
+      <Notification message={message} success={success} />
       <Filter filter={filter} handleFilterChange={handleFilterChange} />
       <h2>add a new</h2>
       <PersonForm

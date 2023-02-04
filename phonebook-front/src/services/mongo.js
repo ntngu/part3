@@ -16,24 +16,29 @@ if (process.argv.length < 3) {
   process.exit(1);
 }
 
-mongoose.connect(url).then((result) => {
-  console.log("connected");
-  if (process.argv.length === 3) {
-    console.log("Phonebook");
-    Person.find({}).then((persons) => {
-      console.log(persons);
+mongoose
+  .connect(url)
+  .then((result) => {
+    console.log("connected");
+    if (process.argv.length === 3) {
+      console.log("Phonebook");
+      Person.find({}).then((persons) => {
+        console.log(persons);
+        mongoose.connection.close();
+      });
+    } else {
+      const person = new Person({
+        name: process.argv[3],
+        number: process.argv[4],
+      });
+      console.log(
+        `added ${process.argv[2]} number ${process.argv[3]} to phonebook`
+      );
+      return person.save();
+    }
+  })
+  .then((result) => {
+    if (result !== undefined) {
       mongoose.connection.close();
-    });
-  } else {
-    const person = new Person({
-      name: process.argv[3],
-      number: process.argv[4],
-    });
-    console.log(
-      `added ${process.argv[2]} number ${process.argv[3]} to phonebook`
-    );
-    return person.save();
-  }
-}).then(() => {
-  mongoose.connection.close();
-});
+    }
+  });
